@@ -31,12 +31,8 @@ impl PokeApiClient {
                 let json = response.text().await?;
                 self.build_pokemon_info(&json)
             }
-            StatusCode::NOT_FOUND => {
-                Err(PokeApiClientError::NotFound)
-            }
-            _ => {
-                Err(PokeApiClientError::InternalError)
-            }
+            StatusCode::NOT_FOUND => Err(PokeApiClientError::NotFound),
+            _ => Err(PokeApiClientError::InternalError),
         }
     }
 

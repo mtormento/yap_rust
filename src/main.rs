@@ -1,10 +1,15 @@
 mod funtranslations_api;
 mod poke_api;
 
-use actix_web::{App, HttpResponse, HttpResponseBuilder, HttpServer, ResponseError, get, http, http::header, web::{self, Data}};
+use actix_web::{
+    get, http,
+    http::header,
+    web::{self, Data},
+    App, HttpResponse, HttpResponseBuilder, HttpServer, ResponseError,
+};
 use funtranslations_api::client::FunTranslationsApiClient;
 use poke_api::client::{PokeApiClient, PokeApiClientError};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::fmt::{self, Display};
 
 #[derive(Deserialize)]
@@ -30,7 +35,7 @@ impl ResponseError for PokeError {
     fn status_code(&self) -> http::StatusCode {
         http::StatusCode::from_u16(self.status_code).unwrap()
     }
-    
+
     fn error_response(&self) -> HttpResponse {
         HttpResponseBuilder::new(self.status_code())
             .insert_header(header::ContentType(mime::APPLICATION_JSON))
@@ -41,27 +46,21 @@ impl ResponseError for PokeError {
 impl From<PokeApiClientError> for PokeError {
     fn from(error: PokeApiClientError) -> Self {
         match error {
-            PokeApiClientError::BadRequest { message } => {
-                PokeError {
-                    status_code: http::StatusCode::BAD_REQUEST.as_u16(),
-                    code: String::from("PE_BAD_REQUEST"),
-                    message: message,
-                }
-            }
-            PokeApiClientError::InternalError => {
-                PokeError {
-                    status_code: http::StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
-                    code: String::from("PE_INTERNAL"),
-                    message: String::from("internal error"),
-                }
-            }
-            PokeApiClientError::NotFound => {
-                PokeError {
-                    status_code: http::StatusCode::NOT_FOUND.as_u16(),
-                    code: String::from("PE_NOT_FOUND"),
-                    message: String::from("pokemon not found"),
-                }
-            }
+            PokeApiClientError::BadRequest { message } => PokeError {
+                status_code: http::StatusCode::BAD_REQUEST.as_u16(),
+                code: String::from("PE_BAD_REQUEST"),
+                message: message,
+            },
+            PokeApiClientError::InternalError => PokeError {
+                status_code: http::StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                code: String::from("PE_INTERNAL"),
+                message: String::from("internal error"),
+            },
+            PokeApiClientError::NotFound => PokeError {
+                status_code: http::StatusCode::NOT_FOUND.as_u16(),
+                code: String::from("PE_NOT_FOUND"),
+                message: String::from("pokemon not found"),
+            },
         }
     }
 }
