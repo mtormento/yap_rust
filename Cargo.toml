@@ -1,0 +1,13 @@
+[package]
+name = "poke"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "4.0.0-beta.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0" }
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
+mime = "0.3.16"
