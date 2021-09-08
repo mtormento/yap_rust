@@ -11,3 +11,10 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 mime = "0.3.16"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros"] }
+wiremock = "0.5"
+fake = "2.4"
+rand = "0.8"
+claim = "0.5"

@@ -87,7 +87,7 @@ async fn get_pokemon_info(
     info: web::Path<PathParams>,
     poke_api_client: web::Data<PokeApiClient>,
 ) -> Result<HttpResponse, PokeError> {
-    let pokemon_info = poke_api_client.get_info(&info.name).await?;
+    let pokemon_info = poke_api_client.get_pokemon_info(&info.name).await?;
     Ok(HttpResponse::Ok().json(pokemon_info))
 }
 
@@ -97,7 +97,7 @@ async fn get_pokemon_info_translated(
     poke_api_client: web::Data<PokeApiClient>,
     funtranslations_api_client: web::Data<FunTranslationsApiClient>,
 ) -> Result<HttpResponse, PokeError> {
-    let mut pokemon_info = poke_api_client.get_info(&info.name).await?;
+    let mut pokemon_info = poke_api_client.get_pokemon_info(&info.name).await?;
     let mut dialect = "shakespeare";
     if pokemon_info.habitat == "cave" || pokemon_info.is_legendary {
         dialect = "yoda";
