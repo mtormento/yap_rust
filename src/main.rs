@@ -7,7 +7,7 @@ use actix_web::{
     web::{self, Data},
     App, HttpResponse, HttpResponseBuilder, HttpServer, ResponseError,
 };
-use funtranslations_api::client::FunTranslationsApiClient;
+use funtranslations_api::client::{FunTranslationsApiClient, FunTranslationsApiClientError};
 use poke_api::client::{PokeApiClient, PokeApiClientError};
 use serde::{Deserialize, Serialize};
 use std::fmt::{self, Display};
@@ -65,6 +65,23 @@ impl From<PokeApiClientError> for PokeError {
     }
 }
 
+impl From<FunTranslationsApiClientError> for PokeError {
+    fn from(error: FunTranslationsApiClientError) -> Self {
+        match error {
+            FunTranslationsApiClientError::BadRequest { message } => PokeError {
+                status_code: http::StatusCode::BAD_REQUEST.as_u16(),
+                code: String::from("PE_BAD_REQUEST"),
+                message: message,
+            },
+            FunTranslationsApiClientError::InternalError => PokeError {
+                status_code: http::StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+                code: String::from("PE_INTERNAL"),
+                message: String::from("internal error"),
+            },
+        }
+    }
+}
+
 #[get("/pokemon/{name}")]
 async fn get_pokemon_info(
     info: web::Path<PathParams>,
@@ -78,8 +95,17 @@ async fn get_pokemon_info(
 async fn get_pokemon_info_translated(
     info: web::Path<PathParams>,
     poke_api_client: web::Data<PokeApiClient>,
+    funtranslations_api_client: web::Data<FunTranslationsApiClient>,
 ) -> Result<HttpResponse, PokeError> {
-    let pokemon_info = poke_api_client.get_info(&info.name).await?;
+    let mut pokemon_info = poke_api_client.get_info(&info.name).await?;
+    let mut dialect = "shakespeare";
+    if pokemon_info.habitat == "cave" || pokemon_info.is_legendary {
+        dialect = "yoda";
+    }
+    let translation = funtranslations_api_client
+        .translate(dialect, &pokemon_info.description)
+        .await?;
+    pokemon_info.description = String::from(translation.translated);
     Ok(HttpResponse::Ok().json(pokemon_info))
 }
 
@@ -88,14 +114,16 @@ async fn main() -> std::io::Result<()> {
     let poke_api_client = Data::new(PokeApiClient::new(String::from(
         "https://pokeapi.co/api/v2",
     )));
-    let fun_translations_api_client = Data::new(FunTranslationsApiClient::new(String::from("/")));
+    let funtranslations_api_client = Data::new(FunTranslationsApiClient::new(String::from(
+        "https://api.funtranslations.com",
+    )));
 
     HttpServer::new(move || {
         App::new()
             .service(get_pokemon_info)
             .service(get_pokemon_info_translated)
             .app_data(poke_api_client.clone())
-            .app_data(fun_translations_api_client.clone())
+            .app_data(funtranslations_api_client.clone())
     })
     .bind("127.0.0.1:8080")?
     .run()

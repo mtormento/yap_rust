@@ -56,7 +56,7 @@ impl PokeApiClient {
         {
             Ok(PokemonInfo {
                 name: String::from(name.unwrap()),
-                description: String::from(description.unwrap()),
+                description: String::from(description.unwrap()).replace('\n', " "),
                 habitat: String::from(habitat.unwrap()),
                 is_legendary: is_legendary.unwrap(),
             })

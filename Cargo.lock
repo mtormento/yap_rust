@@ -890,17 +890,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
-name = "poke"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "mime",
- "reqwest",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "ppv-lite86"
 version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1634,6 +1623,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0120db82e8a1e0b9fb3345a539c478767c0048d842860994d96113d5b667bd69"
 dependencies = [
  "winapi",
+]
+
+[[package]]
+name = "yap_rust"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "mime",
+ "reqwest",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
