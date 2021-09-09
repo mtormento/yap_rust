@@ -10,7 +10,10 @@ use actix_web::{
 use funtranslations_api::client::{FunTranslationsApiClient, FunTranslationsApiClientError};
 use poke_api::client::{PokeApiClient, PokeApiClientError};
 use serde::{Deserialize, Serialize};
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    time::Duration,
+};
 
 #[derive(Deserialize)]
 struct PathParams {
@@ -73,6 +76,11 @@ impl From<FunTranslationsApiClientError> for PokeError {
                 code: String::from("PE_BAD_REQUEST"),
                 message: message,
             },
+            FunTranslationsApiClientError::NotFound => PokeError {
+                status_code: http::StatusCode::NOT_FOUND.as_u16(),
+                code: String::from("PE_NOT_FOUND"),
+                message: String::from("not found"),
+            },
             FunTranslationsApiClientError::InternalError => PokeError {
                 status_code: http::StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
                 code: String::from("PE_INTERNAL"),
@@ -111,12 +119,14 @@ async fn get_pokemon_info_translated(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let poke_api_client = Data::new(PokeApiClient::new(String::from(
-        "https://pokeapi.co/api/v2",
-    )));
-    let funtranslations_api_client = Data::new(FunTranslationsApiClient::new(String::from(
-        "https://api.funtranslations.com",
-    )));
+    let poke_api_client = Data::new(PokeApiClient::new(
+        String::from("https://pokeapi.co/api/v2"),
+        Duration::from_secs(10),
+    ));
+    let funtranslations_api_client = Data::new(FunTranslationsApiClient::new(
+        String::from("https://api.funtranslations.com"),
+        Duration::from_secs(10),
+    ));
 
     HttpServer::new(move || {
         App::new()
